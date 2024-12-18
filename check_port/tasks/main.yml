@@ -1,0 +1,28 @@
+---
+- name: "Create result list"
+  set_fact:
+    port_check_result: []
+  when: show_result
+
+- name: "Check ping to target hosts"
+  ansible.builtin.ping:
+  when: ping_test
+  loop: "{{ target_hosts_ports | map(attribute='host') | flatten }}"
+  loop_control:
+    loop_var: target_host
+  ignore_errors: yes
+
+- name: "Check port status using nc"
+  include_tasks: nc_check.yml
+  with_subelements:
+    - "{{ target_hosts_ports }}"
+    - host
+  loop_control:
+    loop_var: target_host
+
+- name: "Display port check results"
+  debug:
+    msg: "{{ 'Success' if item.rc == 0 else 'Failed' }}"
+  failed_when: "item.rc != 0"
+  loop: "{{ port_check_result }}"
+  when: show_result

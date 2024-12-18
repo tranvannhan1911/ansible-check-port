@@ -1,0 +1,21 @@
+- name: "Check ports using nc"
+  ansible.builtin.shell: |
+    nc -zv -w {{ timeout }} {{ target_host[1] }} {{ item }}
+  register: nc_result
+  loop: "{{ target_host[0].port }}"
+  loop_control:
+    loop_var: item
+  vars:
+    timeout: 5
+  ignore_errors: yes
+
+- name: "Append port check results to port_check_result"
+  ansible.builtin.set_fact:
+    port_check_result: >
+      {{ port_check_result + [{
+        'host': target_host[1],
+        'port': item.item,
+        'rc': item.rc,
+        'stderr': item.stderr
+      }] }}
+  with_items: "{{ nc_result.results }}"

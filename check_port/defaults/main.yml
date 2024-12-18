@@ -1,0 +1,9 @@
+show_result: false
+ping_test: false
+use_nc: true
+
+target_hosts_ports:
+- host: ["google.com"]
+  port: [80, 443]
+- host: ["localhost"]
+  port: [22, 8080]

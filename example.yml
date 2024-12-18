@@ -1,0 +1,42 @@
+---
+- name: Create result list
+  hosts: all
+  tasks:
+  - name: Create result list
+    set_fact:
+      port_check_result: []
+
+- name: Test multiple target hosts and ports
+  hosts: group1
+  roles:
+  - role: roles/check_port
+  vars:
+    target_hosts_ports:
+    - host: ["google.com"]
+      port: [80, 443]
+    - host: ["localhost"]
+      port: [22, 8080]
+    show_result: false
+    ping_test: false
+    use_nc: true
+
+- name: Test multiple target hosts and ports
+  hosts: group2
+  roles:
+  - role: roles/check_port
+  vars:
+    target_hosts_ports:
+    - host: ["google.com"]
+      port: [80, 443]
+    show_result: false
+    ping_test: false
+    use_nc: true
+
+- name: Display port check results
+  hosts: all
+  tasks:
+  - name: Display port check results
+    debug:
+      msg: "{{ 'Success' if item.rc == 0 else 'Failed' }}"
+    failed_when: "item.rc != 0"
+    loop: "{{ port_check_result }}"
